@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pencatatan Barang Datang - TTR</title>
+<style>
+  :root {
+    --primary: #6C63FF;
+    --primary-dark: #564FCC;
+    --secondary: #FF6584;
+    --accent: #43D9A2;
+    --warning: #FFB347;
+    --danger: #FF5C5C;
+    --bg: #F4F6FF;
+    --card: #FFFFFF;
+    --text: #2D2D3A;
+    --text-muted: #8888A0;
+    --border: #E0E0F0;
+    --shadow: 0 4px 24px rgba(108,99,255,0.10);
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, #A084E8 100%);
+    color: #fff;
+    padding: 0 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+    box-shadow: 0 2px 16px rgba(108,99,255,0.18);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.5px; display:flex; align-items:center; gap:10px; }
+  .header h1 span { font-size: 1.5rem; }
+  .header-right { display:flex; gap:10px; }
+  .btn { display:inline-flex; align-items:center; gap:6px; padding:8px 18px; border-radius:8px; border:none; cursor:pointer; font-size:0.88rem; font-weight:600; transition:all .18s; }
+  .btn-white { background:#fff; color:var(--primary); }
+  .btn-white:hover { background:#EEF0FF; }
+  .btn-accent { background:var(--accent); color:#fff; }
+  .btn-accent:hover { background:#2ec48c; }
+  .btn-danger { background:var(--danger); color:#fff; }
+  .btn-danger:hover { background:#e04040; }
+  .btn-warning { background:var(--warning); color:#fff; }
+  .btn-warning:hover { background:#e09c30; }
+  .btn-primary { background:var(--primary); color:#fff; }
+  .btn-primary:hover { background:var(--primary-dark); }
+  .btn-secondary { background:var(--secondary); color:#fff; }
+  .btn-secondary:hover { background:#e04e6a; }
+  .btn-sm { padding:5px 12px; font-size:0.8rem; }
+
+  /* LAYOUT */
+  .container { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
+
+  /* SUMMARY CARDS */
+  .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .sum-card {
+    background: var(--card); border-radius: var(--radius); padding: 20px 22px;
+    box-shadow: var(--shadow); display: flex; align-items: center; gap: 14px;
+  }
+  .sum-icon { width: 48px; height: 48px; border-radius: 12px; display:flex; align-items:center; justify-content:center; font-size: 1.5rem; }
+  .sum-info p { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+  .sum-info h2 { font-size: 1.7rem; font-weight: 700; }
+  .ic-total { background: #EEF0FF; }
+  .ic-baru { background: #E6FBF4; }
+  .ic-rusak { background: #FFF0F0; }
+  .ic-second { background: #EEF6FF; }
+  .sum-card:nth-child(1) .sum-info h2 { color: var(--primary); }
+  .sum-card:nth-child(2) .sum-info h2 { color: var(--accent); }
+  .sum-card:nth-child(3) .sum-info h2 { color: var(--danger); }
+  .sum-card:nth-child(4) .sum-info h2 { color: #2B7CC7; }
+
+  /* MAIN CARD */
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; overflow:hidden; }
+  .card-header {
+    padding: 18px 24px; display:flex; align-items:center; justify-content:space-between;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(90deg, #FAFAFF 0%, #fff 100%);
+  }
+  .card-title { font-size: 1rem; font-weight: 700; display:flex; align-items:center; gap:8px; color: var(--primary); }
+  .card-body { padding: 24px; }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display:flex; flex-direction:column; gap:6px; }
+  .form-group.full { grid-column: 1/-1; }
+  label { font-size: 0.83rem; font-weight: 600; color: var(--text-muted); }
+  input, select, textarea {
+    padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 0.93rem; color: var(--text); background: #FAFAFF;
+    transition: border .18s, box-shadow .18s; outline:none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--primary); box-shadow: 0 0 0 3px rgba(108,99,255,0.12);
+  }
+  textarea { resize: vertical; min-height: 72px; }
+  .form-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:8px; }
+
+  /* PHOTO UPLOAD */
+  .photo-upload-area {
+    border: 2px dashed var(--border); border-radius: 10px; padding: 18px;
+    text-align: center; cursor: pointer; transition: border .18s, background .18s;
+    background: #FAFAFF;
+  }
+  .photo-upload-area:hover { border-color: var(--primary); background: #EEF0FF; }
+  .photo-upload-area input { display:none; }
+  .photo-preview { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .photo-thumb { width:64px; height:64px; object-fit:cover; border-radius:8px; border: 2px solid var(--border); }
+
+  /* FILTER BAR */
+  .filter-bar { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .filter-bar input, .filter-bar select { flex:1; min-width:150px; }
+  .filter-bar input { max-width: 280px; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  thead tr { background: linear-gradient(90deg, var(--primary) 0%, #A084E8 100%); color: #fff; }
+  thead th { padding: 12px 14px; text-align:left; font-weight: 600; white-space:nowrap; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .13s; }
+  tbody tr:hover { background: #F4F6FF; }
+  tbody td { padding: 11px 14px; vertical-align: middle; }
+  .badge {
+    display:inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 700; white-space: nowrap;
+  }
+  .badge-baru { background:#E6FBF4; color:#1AA87A; }
+  .badge-rusak { background:#FFF0F0; color:#E53E3E; }
+  .badge-second { background:#EEF6FF; color:#2B7CC7; }
+  .thumb-small { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1.5px solid var(--border); cursor:pointer; }
+  .no-photo { width: 40px; height: 40px; border-radius: 6px; background: #EEF0FF; display:flex; align-items:center; justify-content:center; font-size:1.1rem; color: var(--text-muted); }
+  .action-btns { display:flex; gap:6px; }
+  .empty-state { text-align:center; padding: 48px 20px; color: var(--text-muted); }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 10px; }
+
+  /* MODAL */
+  .modal-overlay {
+    display:none; position:fixed; inset:0; background: rgba(30,20,60,0.45);
+    z-index: 999; align-items:center; justify-content:center;
+  }
+  .modal-overlay.active { display:flex; }
+  .modal {
+    background: var(--card); border-radius: 18px; padding: 32px;
+    max-width: 520px; width: 94%; box-shadow: 0 8px 48px rgba(108,99,255,0.22);
+    position:relative; max-height: 90vh; overflow-y:auto;
+  }
+  .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 18px; }
+  .modal-close { position:absolute; top:16px; right:16px; background:none; border:none; font-size:1.4rem; cursor:pointer; color: var(--text-muted); }
+  .modal-photo-gallery { display:flex; flex-wrap:wrap; gap:10px; }
+  .modal-photo-gallery img { width: 120px; height: 100px; object-fit:cover; border-radius:8px; border:2px solid var(--border); }
+  .modal-row { display:flex; gap:8px; margin-bottom:8px; }
+  .modal-label { font-weight:600; color: var(--text-muted); font-size:0.83rem; min-width:130px; }
+  .modal-value { font-size:0.9rem; }
+
+  /* TOAST */
+  .toast-container { position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+  .toast {
+    padding: 12px 20px; border-radius: 10px; color:#fff; font-weight:600; font-size:0.9rem;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.15); animation: slideIn .28s ease;
+    display:flex; align-items:center; gap:8px;
+  }
+  .toast-success { background: var(--accent); }
+  .toast-error { background: var(--danger); }
+  .toast-info { background: var(--primary); }
+  @keyframes slideIn { from { transform: translateX(80px); opacity:0; } to { transform: translateX(0); opacity:1; } }
+
+  /* PRINT STYLES */
+  @media print {
+    .header, .filter-bar, .form-actions, .action-btns, .btn, .card-header button { display:none !important; }
+    body { background:#fff; }
+    .card { box-shadow:none; border:1px solid #ddd; }
+    .summary { display:none; }
+  }
+
+  @media (max-width: 768px) {
+    .summary { grid-template-columns: 1fr 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .filter-bar { flex-direction:column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>Pencatatan Barang Datang - TulusTeknoRent</h1>
+  <div class="header-right">
+    <button class="btn btn-white" onclick="exportCSV()">⬇️ Export CSV</button>
+    <button class="btn btn-white" onclick="window.print()">🖨️ Print / PDF</button>
+  </div>
+</div>
+
+<!-- CONTAINER -->
+<div class="container">
+
+  <!-- SUMMARY -->
+  <div class="summary" id="summary">
+    <div class="sum-card"><div class="sum-icon ic-total">📦</div><div class="sum-info"><p>Total Barang</p><h2 id="s-total">0</h2></div></div>
+    <div class="sum-card"><div class="sum-icon ic-baru">✅</div><div class="sum-info"><p>Kondisi Baru</p><h2 id="s-baru">0</h2></div></div>
+    <div class="sum-card"><div class="sum-icon ic-rusak">⚠️</div><div class="sum-info"><p>Rusak / Servis</p><h2 id="s-rusak">0</h2></div></div>
+    <div class="sum-card"><div class="sum-icon ic-second">🔄</div><div class="sum-info"><p>Second</p><h2 id="s-second">0</h2></div></div>
+  </div>
+
+  <!-- FORM TAMBAH -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">➕ <span id="form-title-text">Tambah Barang Masuk</span></div>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tanggal Penerimaan *</label>
+          <input type="date" id="f-tanggal">
+        </div>
+        <div class="form-group">
+          <label>No Resi/Pengiriman</label>
+          <input type="text" id="f-nopd" placeholder="Contoh: JX-934981200">
+        </div>
+        <div class="form-group">
+          <label>Merk *</label>
+          <select id="f-merk" onchange="onMerkChange('f')">
+            <option value="">— Pilih Merk —</option>
+            <option>Lenovo</option><option>HP</option><option>Dell</option>
+            <option>ASUS</option><option>Acer</option><option>Apple</option>
+            <option>MSI</option><option>Toshiba</option><option>Samsung</option>
+            <option>Lainnya</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nama Laptop / Model *</label>
+          <select id="f-nama" onchange="onNamaChange('f')">
+            <option value="">— Pilih Merk dulu —</option>
+          </select>
+          <input type="text" id="f-nama-custom" placeholder="✏️ Ketik nama model manual..." style="display:none;margin-top:6px;padding:10px 14px;border:1.5px solid var(--primary);border-radius:8px;font-size:0.93rem;width:100%;background:#FAFAFF;outline:none;">
+        </div>
+        <div class="form-group">
+          <label>Serial Number *</label>
+          <input type="text" id="f-serial" placeholder="Contoh: SN-123456789">
+        </div>
+        <div class="form-group">
+          <label>Jumlah Unit *</label>
+          <select id="f-jumlah">
+            <option value="1" selected>1 Unit</option>
+            <option value="2">2 Unit</option><option value="3">3 Unit</option>
+            <option value="4">4 Unit</option><option value="5">5 Unit</option>
+            <option value="6">6 Unit</option><option value="7">7 Unit</option>
+            <option value="8">8 Unit</option><option value="9">9 Unit</option>
+            <option value="10">10 Unit</option><option value="11">11 Unit</option>
+            <option value="12">12 Unit</option><option value="13">13 Unit</option>
+            <option value="14">14 Unit</option><option value="15">15 Unit</option>
+            <option value="20">20 Unit</option><option value="25">25 Unit</option>
+            <option value="30">30 Unit</option><option value="50">50 Unit</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Kondisi *</label>
+          <select id="f-kondisi">
+            <option value="">— Pilih Kondisi —</option>
+            <option value="Baru">Baru</option>
+            <option value="Second">Second</option>
+            <option value="Rusak / Perlu Servis">Rusak / Perlu Servis</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Diterima Oleh *</label>
+          <input type="text" id="f-penerima" placeholder="Nama penerima">
+        </div>
+        <div class="form-group">
+          <label>Pengirim / Vendor</label>
+          <input type="text" id="f-vendor" placeholder="Nama vendor / pengirim">
+        </div>
+        <div class="form-group">
+          <label>Spesifikasi (RAM / SSD / CPU)</label>
+          <select id="f-spek" onchange="onSpekChange('f')">
+            <option value="">— Pilih Merk dulu —</option>
+          </select>
+          <input type="text" id="f-spek-custom" placeholder="Tulis spesifikasi manual..." style="display:none;margin-top:6px;">
+        </div>
+        <div class="form-group full">
+          <label>Catatan</label>
+          <textarea id="f-catatan" placeholder="Catatan tambahan..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Foto Barang</label>
+          <div class="photo-upload-area" onclick="document.getElementById('f-foto').click()">
+            <input type="file" id="f-foto" multiple accept="image/*" onchange="handlePhotoUpload(event)">
+            <div id="photo-placeholder">📷 Klik untuk upload foto (bisa lebih dari satu)</div>
+            <div class="photo-preview" id="photo-preview"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-warning" onclick="resetForm()">🔄 Reset</button>
+        <button class="btn btn-primary" onclick="simpanBarang()">💾 Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA TABLE -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">📋 Daftar Barang Masuk</div>
+      <button class="btn btn-danger btn-sm" onclick="hapusSemua()">🗑️ Hapus Semua</button>
+    </div>
+    <div class="card-body">
+      <div class="filter-bar" style="margin-bottom:16px;">
+        <input type="text" id="search" placeholder="🔍 Cari nama, serial, merk..." oninput="renderTable()">
+        <select id="filter-kondisi" onchange="renderTable()">
+          <option value="">Semua Kondisi</option>
+          <option value="Baru">Baru</option>
+          <option value="Second">Second</option>
+          <option value="Rusak / Perlu Servis">Rusak / Perlu Servis</option>
+        </select>
+        <select id="filter-merk" onchange="renderTable()">
+          <option value="">Semua Merk</option>
+          <option>Lenovo</option><option>HP</option><option>Dell</option>
+          <option>ASUS</option><option>Acer</option><option>Apple</option>
+          <option>MSI</option><option>Toshiba</option><option>Samsung</option><option>Lainnya</option>
+        </select>
+        <input type="date" id="filter-date-from" onchange="renderTable()" title="Dari tanggal">
+        <input type="date" id="filter-date-to" onchange="renderTable()" title="Sampai tanggal">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Foto</th>
+              <th>Tanggal</th>
+              <th>No. Dok</th>
+              <th>Nama / Model</th>
+              <th>Merk</th>
+              <th>Serial Number</th>
+              <th>Jml</th>
+              <th>Kondisi</th>
+              <th>Penerima</th>
+              <th>Vendor</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+        <div id="empty-state" class="empty-state" style="display:none;">
+          <div class="icon">📭</div>
+          <p>Belum ada data barang masuk.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETAIL -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-detail')">✕</button>
+    <div class="modal-title">📋 Detail Barang</div>
+    <div id="modal-detail-content"></div>
+  </div>
+</div>
+
+<!-- MODAL EDIT -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-edit')">✕</button>
+    <div class="modal-title">✏️ Edit Barang</div>
+    <div class="form-grid" style="gap:12px;" id="edit-form-content"></div>
+    <div class="form-actions" style="margin-top:14px;">
+      <button class="btn btn-warning" onclick="closeModal('modal-edit')">Batal</button>
+      <button class="btn btn-primary" onclick="simpanEdit()">💾 Simpan Perubahan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOTO BESAR -->
+<div class="modal-overlay" id="modal-foto">
+  <div class="modal" style="max-width:700px; background:rgba(20,15,40,0.96);">
+    <button class="modal-close" style="color:#fff;" onclick="closeModal('modal-foto')">✕</button>
+    <img id="modal-foto-img" src="" style="width:100%; border-radius:10px;">
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ===== KATALOG LAPTOP =====
+const KATALOG = {
+  'Lenovo': {
+    models: [
+      // === ThinkPad X Series ===
+      'ThinkPad X220', 'ThinkPad X230', 'ThinkPad X240', 'ThinkPad X250', 'ThinkPad X260',
+      'ThinkPad X270', 'ThinkPad X280', 'ThinkPad X390', 'ThinkPad X395',
+      'ThinkPad X1 Carbon Gen 1', 'ThinkPad X1 Carbon Gen 2', 'ThinkPad X1 Carbon Gen 3',
+      'ThinkPad X1 Carbon Gen 4', 'ThinkPad X1 Carbon Gen 5', 'ThinkPad X1 Carbon Gen 6',
+      'ThinkPad X1 Carbon Gen 7', 'ThinkPad X1 Carbon Gen 8', 'ThinkPad X1 Carbon Gen 9',
+      'ThinkPad X1 Carbon Gen 10', 'ThinkPad X1 Carbon Gen 11', 'ThinkPad X1 Carbon Gen 12',
+      'ThinkPad X1 Yoga Gen 6', 'ThinkPad X1 Yoga Gen 7', 'ThinkPad X1 Yoga Gen 8',
+      'ThinkPad X1 Extreme Gen 4', 'ThinkPad X1 Extreme Gen 5',
+      // === ThinkPad T Series ===
+      'ThinkPad T430', 'ThinkPad T440', 'ThinkPad T450', 'ThinkPad T460', 'ThinkPad T470',
+      'ThinkPad T480', 'ThinkPad T490', 'ThinkPad T495',
+      'ThinkPad T14 Gen 1', 'ThinkPad T14 Gen 2', 'ThinkPad T14 Gen 3', 'ThinkPad T14 Gen 4',
+      'ThinkPad T14s Gen 1', 'ThinkPad T14s Gen 2', 'ThinkPad T14s Gen 3', 'ThinkPad T14s Gen 4',
+      'ThinkPad T15 Gen 1', 'ThinkPad T15 Gen 2',
+      'ThinkPad T15p Gen 1', 'ThinkPad T15p Gen 2', 'ThinkPad T15p Gen 3',
+      // === ThinkPad E Series ===
+      'ThinkPad E430', 'ThinkPad E440', 'ThinkPad E450', 'ThinkPad E460', 'ThinkPad E470',
+      'ThinkPad E480', 'ThinkPad E490', 'ThinkPad E495',
+      'ThinkPad E14 Gen 1', 'ThinkPad E14 Gen 2', 'ThinkPad E14 Gen 3',
+      'ThinkPad E14 Gen 4', 'ThinkPad E14 Gen 5', 'ThinkPad E14 Gen 6',
+      'ThinkPad E15 Gen 1', 'ThinkPad E15 Gen 2', 'ThinkPad E15 Gen 3',
+      'ThinkPad E15 Gen 4', 'ThinkPad E16 Gen 1', 'ThinkPad E16 Gen 2',
+      // === ThinkPad L Series ===
+      'ThinkPad L430', 'ThinkPad L440', 'ThinkPad L450', 'ThinkPad L460', 'ThinkPad L470',
+      'ThinkPad L480', 'ThinkPad L490', 'Thinkpad L390',
+      'ThinkPad L14 Gen 1', 'ThinkPad L14 Gen 2', 'ThinkPad L14 Gen 3', 'ThinkPad L14 Gen 4',
+      'ThinkPad L15 Gen 1', 'ThinkPad L15 Gen 2', 'ThinkPad L15 Gen 3', 'ThinkPad L15 Gen 4',
+      // === ThinkBook Series ===
+      'ThinkBook 13s Gen 2', 'ThinkBook 13s Gen 3', 'ThinkBook 13s Gen 4',
+      'ThinkBook 14 Gen 2', 'ThinkBook 14 Gen 3', 'ThinkBook 14 Gen 4', 'ThinkBook 14 Gen 5', 'ThinkBook 14 Gen 6',
+      'ThinkBook 15 Gen 2', 'ThinkBook 15 Gen 3', 'ThinkBook 15 Gen 4',
+      'ThinkBook 16 Gen 1', 'ThinkBook 16 Gen 6', 'ThinkBook 16p Gen 4',
+      // === IdeaPad Series ===
+      'IdeaPad 310', 'IdeaPad 320', 'IdeaPad 330', 'IdeaPad 340', 'IdeaPad 3 14',
+      'IdeaPad 3 15', 'IdeaPad 3 17', 'IdeaPad 5 14', 'IdeaPad 5 15', 'IdeaPad 5 16',
+      'IdeaPad Slim 1', 'IdeaPad Slim 3 14', 'IdeaPad Slim 3 15', 'IdeaPad Slim 3 16',
+      'IdeaPad Slim 5 14', 'IdeaPad Slim 5 15', 'IdeaPad Slim 5 16',
+      'IdeaPad Slim 5i Gen 8', 'IdeaPad Slim 3i Gen 8',
+      'IdeaPad Gaming 3 15', 'IdeaPad Gaming 3 16',
+      'IdeaPad Duet 5 Chromebook',
+      // === Legion Series ===
+      'Legion Y520', 'Legion Y530', 'Legion Y540',
+      'Legion 5 15 (2020)', 'Legion 5 15 (2021)', 'Legion 5 15 (2022)',
+      'Legion 5 Gen 7', 'Legion 5 Gen 8', 'Legion 5 Gen 9',
+      'Legion 5i Gen 7', 'Legion 5i Gen 8', 'Legion 5i Gen 9',
+      'Legion 5 Pro Gen 6', 'Legion 5 Pro Gen 7', 'Legion 5 Pro Gen 8',
+      'Legion 7 Gen 7', 'Legion 7 Gen 8', 'Legion 7i Gen 7', 'Legion 7i Gen 8',
+      'Legion Slim 5 Gen 8', 'Legion Slim 7 Gen 8',
+      'Legion Pro 5 Gen 8', 'Legion Pro 7 Gen 8',
+      // === Yoga Series ===
+      'Yoga 520', 'Yoga 530', 'Yoga 540',
+      'Yoga 7 14', 'Yoga 7 16', 'Yoga 9i Gen 7', 'Yoga 9i Gen 8',
+      'Yoga Slim 6', 'Yoga Slim 7 Pro',
+      // === Lainnya ===
+      'Lainnya (Lenovo)'
+    ],
+    spek: [
+      'Intel Core i3-1215U, 8GB RAM, 256GB SSD',
+      'Intel Core i3-1315U, 8GB RAM, 256GB SSD',
+      'Intel Core i5-8235U, 8GB RAM, 256GB SSD',
+      'Intel Core i5-10310U, 8GB RAM, 256GB SSD',
+      'Intel Core i5-1235U, 8GB RAM, 512GB SSD',
+      'Intel Core i5-1335U, 8GB RAM, 512GB SSD',
+      'Intel Core i5-1335U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1255U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1355U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1355U, 16GB RAM, 1TB SSD',
+      'AMD Ryzen 5 5600U, 8GB RAM, 512GB SSD',
+      'AMD Ryzen 5 7530U, 8GB RAM, 512GB SSD',
+      'AMD Ryzen 5 7530U, 16GB RAM, 512GB SSD',
+      'AMD Ryzen 7 5700U, 16GB RAM, 512GB SSD',
+      'AMD Ryzen 7 7730U, 16GB RAM, 512GB SSD',
+      'Intel Core i5-12500H, 16GB RAM, 512GB SSD, RTX 3050',
+      'Intel Core i5-13420H, 16GB RAM, 512GB SSD, RTX 3050',
+      'Intel Core i7-12700H, 16GB RAM, 512GB SSD, RTX 3060',
+      'Intel Core i7-13700H, 16GB RAM, 512GB SSD, RTX 4060',
+      'Intel Core i7-13700H, 32GB RAM, 1TB SSD, RTX 4060',
+      'Intel Core i9-13900H, 32GB RAM, 1TB SSD, RTX 4070',
+      'AMD Ryzen 7 7745HX, 16GB RAM, 1TB SSD, RTX 4070',
+      'Spesifikasi Lainnya'
+    ]
+  },
+  'HP': {
+    models: [
+      // === EliteBook Series ===
+      'EliteBook 2540p', 'EliteBook 8470p', 'EliteBook 8570p',
+      'EliteBook 820 G1', 'EliteBook 820 G2', 'EliteBook 820 G3', 'EliteBook 820 G4',
+      'EliteBook 840 G1', 'EliteBook 840 G2', 'EliteBook 840 G3', 'EliteBook 840 G4',
+      'EliteBook 840 G5', 'EliteBook 840 G6', 'EliteBook 840 G7', 'EliteBook 840 G8',
+      'EliteBook 840 G9', 'EliteBook 840 G10',
+      'EliteBook 850 G5', 'EliteBook 850 G6', 'EliteBook 850 G7', 'EliteBook 850 G8', 'EliteBook 850 G9',
+      'EliteBook 860 G9', 'EliteBook 860 G10',
+      'EliteBook 865 G9', 'EliteBook 865 G10',
+      'EliteBook 1040 G9', 'EliteBook 1040 G10',
+      'EliteBook x360 830 G6', 'EliteBook x360 830 G7', 'EliteBook x360 830 G8',
+      'EliteBook x360 1030 G4', 'EliteBook x360 1040 G6',
+      // === ProBook Series ===
+      'ProBook 430 G5', 'ProBook 430 G6', 'ProBook 430 G7', 'ProBook 430 G8',
+      'ProBook 440 G5', 'ProBook 440 G6', 'ProBook 440 G7', 'ProBook 440 G8', 'ProBook 440 G9', 'ProBook 440 G10',
+      'ProBook 450 G5', 'ProBook 450 G6', 'ProBook 450 G7', 'ProBook 450 G8', 'ProBook 450 G9', 'ProBook 450 G10',
+      'ProBook 455 G7', 'ProBook 455 G8', 'ProBook 455 G9', 'ProBook 455 G10',
+      'ProBook 470 G5', 'ProBook 470 G7',
+      'ProBook 640 G8', 'ProBook 650 G5',
+      // === Pavilion Series ===
+      'Pavilion 14-dv', 'Pavilion 15-eh', 'Pavilion 15-eg',
+      'Pavilion x360 14', 'Pavilion x360 15',
+      'Pavilion Gaming 15-dk', 'Pavilion Gaming 15-ec', 'Pavilion Gaming 16',
+      // === Laptop Series ===
+      'HP Laptop 14s-cf', 'HP Laptop 14s-dq', 'HP Laptop 14s-fq',
+      'HP Laptop 15s-du', 'HP Laptop 15s-eq', 'HP Laptop 15s-fq',
+      'HP Laptop 14-dq', 'HP Laptop 15-dw', 'HP Laptop 15-dy', 'HP Laptop 15-ef',
+      // === OMEN Series ===
+      'OMEN 15 (2020)', 'OMEN 15 (2021)',
+      'OMEN 16 (2022)', 'OMEN 16 (2023)', 'OMEN 16 (2024)',
+      'OMEN 17 (2022)', 'OMEN 17 (2023)',
+      'OMEN Transcend 14', 'OMEN Transcend 16',
+      // === Spectre Series ===
+      'Spectre x360 13 (2019)', 'Spectre x360 13 (2020)',
+      'Spectre x360 14 (2021)', 'Spectre x360 14 (2022)', 'Spectre x360 14 (2023)',
+      'Spectre x360 13.5 (2022)', 'Spectre x360 16 (2021)',
+      // === ZBook / Dragonfly ===
+      'ZBook Fury 15 G8', 'ZBook Fury 16 G9', 'ZBook Fury 16 G10',
+      'ZBook Studio G8', 'ZBook Studio G9',
+      'EliteBook Dragonfly G2', 'EliteBook Dragonfly G3', 'EliteBook Dragonfly G4',
+      // === Lainnya ===
+      'Lainnya (HP)'
+    ],
+    spek: [
+      'Intel Core i3-1215U, 8GB RAM, 256GB SSD',
+      'Intel Core i3-1315U, 8GB RAM, 256GB SSD',
+      'Intel Core i5-1235U, 8GB RAM, 512GB SSD',
+      'Intel Core i5-1335U, 8GB RAM, 512GB SSD',
+      'Intel Core i5-1335U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1255U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1355U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1355U, 16GB RAM, 1TB SSD',
+      'AMD Ryzen 5 5600U, 8GB RAM, 512GB SSD',
+      'AMD Ryzen 5 7530U, 16GB RAM, 512GB SSD',
+      'AMD Ryzen 7 5700U, 16GB RAM, 512GB SSD',
+      'AMD Ryzen 7 7730U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-12700H, 16GB RAM, 512GB SSD, RTX 3060',
+      'Intel Core i7-13700H, 16GB RAM, 512GB SSD, RTX 4060',
+      'Intel Core i7-13700H, 32GB RAM, 1TB SSD, RTX 4070',
+      'Intel Core i9-13900HX, 32GB RAM, 1TB SSD, RTX 4080',
+      'Spesifikasi Lainnya'
+    ]
+  },
+  'Dell': {
+    models: [
+      // === Latitude Series ===
+      'Latitude E6430', 'Latitude E6440', 'Latitude E6540',
+      'Latitude E7440', 'Latitude E7450', 'Latitude E7470',
+      'Latitude 3480', 'Latitude 3490', 'Latitude 3500', 'Latitude 3510', 'Latitude 3520', 'Latitude 3530',
+      'Latitude 5480', 'Latitude 5490', 'Latitude 5500', 'Latitude 5510', 'Latitude 5520', 'Latitude 5530',
+      'Latitude 5440', 'Latitude 5540',
+      'Latitude 7480', 'Latitude 7490', 'Latitude 7400', 'Latitude 7410', 'Latitude 7420', 'Latitude 7430',
+      'Latitude 7440', 'Latitude 9420', 'Latitude 9430', 'Latitude 9440',
+      'Latitude 3320', 'Latitude 3330', 'Latitude 3340',
+      'Latitude 5320', 'Latitude 5330', 'Latitude 5340',
+      'Latitude 7320', 'Latitude 7330', 'Latitude 7340',
+      // === Vostro Series ===
+      'Vostro 3400', 'Vostro 3401', 'Vostro 3405', 'Vostro 3410', 'Vostro 3415', 'Vostro 3420', 'Vostro 3425',
+      'Vostro 3500', 'Vostro 3501', 'Vostro 3510', 'Vostro 3515', 'Vostro 3520', 'Vostro 3525',
+      'Vostro 5402', 'Vostro 5410', 'Vostro 5415', 'Vostro 5420', 'Vostro 5630',
+      'Vostro 5502', 'Vostro 5510', 'Vostro 5515', 'Vostro 5520', 'Vostro 5625',
+      // === Inspiron Series ===
+      'Inspiron 3452', 'Inspiron 3476', 'Inspiron 3493', 'Inspiron 3501', 'Inspiron 3511',
+      'Inspiron 3515', 'Inspiron 3520', 'Inspiron 3521', 'Inspiron 3525', 'Inspiron 3530',
+      'Inspiron 5406', 'Inspiron 5410', 'Inspiron 5415', 'Inspiron 5420', 'Inspiron 5425', 'Inspiron 5430',
+      'Inspiron 5502', 'Inspiron 5510', 'Inspiron 5515', 'Inspiron 5520', 'Inspiron 5525', 'Inspiron 5530',
+      'Inspiron 7405', 'Inspiron 7415', 'Inspiron 7420', 'Inspiron 7425', 'Inspiron 7430',
+      'Inspiron 14 5445', 'Inspiron 16 5635', 'Inspiron 16 5640',
+      // === XPS Series ===
+      'XPS 13 9305', 'XPS 13 9310', 'XPS 13 9315', 'XPS 13 9320', 'XPS 13 9340',
+      'XPS 13 Plus 9320', 'XPS 13 Plus 9340',
+      'XPS 15 9500', 'XPS 15 9510', 'XPS 15 9520', 'XPS 15 9530',
+      'XPS 17 9700', 'XPS 17 9710', 'XPS 17 9720', 'XPS 17 9730',
+      // === Alienware Series ===
+      'Alienware m15 R5', 'Alienware m15 R6', 'Alienware m15 R7',
+      'Alienware m16', 'Alienware m16 R2',
+      'Alienware m17 R5', 'Alienware x14', 'Alienware x15 R2', 'Alienware x16',
+      // === Precision (Workstation) ===
+      'Precision 3560', 'Precision 3570', 'Precision 5550', 'Precision 5560', 'Precision 5570',
+      // === Lainnya ===
+      'Lainnya (Dell)'
+    ],
+    spek: [
+      'Intel Core i3-1215U, 8GB RAM, 256GB SSD',
+      'Intel Core i3-1315U, 8GB RAM, 256GB SSD',
+      'Intel Core i5-1235U, 8GB RAM, 512GB SSD',
+      'Intel Core i5-1335U, 8GB RAM, 512GB SSD',
+      'Intel Core i5-1335U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1255U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1355U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1355U, 16GB RAM, 1TB SSD',
+      'AMD Ryzen 5 5625U, 8GB RAM, 512GB SSD',
+      'AMD Ryzen 5 7530U, 16GB RAM, 512GB SSD',
+      'AMD Ryzen 7 5825U, 16GB RAM, 512GB SSD',
+      'AMD Ryzen 7 7730U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-12700H, 16GB RAM, 512GB SSD, RTX 3060',
+      'Intel Core i7-13700H, 16GB RAM, 512GB SSD, RTX 4060',
+      'Intel Core i7-13700H, 32GB RAM, 1TB SSD, RTX 4070',
+      'Intel Core i9-13900HX, 32GB RAM, 1TB SSD, RTX 4080',
+      'Spesifikasi Lainnya'
+    ]
+  },
+  'ASUS': {
+    models: [
+      // === ExpertBook Series ===
+      'ExpertBook B1 B1400', 'ExpertBook B1 B1500', 'ExpertBook B1 B1502',
+      'ExpertBook B3 B3402', 'ExpertBook B3 B3404',
+      'ExpertBook B5 B5402', 'ExpertBook B5 Flip B5302',
+      'ExpertBook B9 B9400',
+      // === VivoBook Series ===
+      'VivoBook 14 A416', 'VivoBook 14 A1404', 'VivoBook 14 A1405',
+      'VivoBook 15 A515', 'VivoBook 15 X515', 'VivoBook 15 X1504', 'VivoBook 15 X1505',
+      'VivoBook 15X OLED K3504', 'VivoBook 16 X1605',
+      'VivoBook S 14 OLED M5406', 'VivoBook S 15 OLED K5504',
+      'VivoBook S 14 Flip TP3402', 'VivoBook S 15 M533',
+      'VivoBook Pro 14 OLED', 'VivoBook Pro 15 OLED', 'VivoBook Pro 16X OLED',
+      // === ZenBook Series ===
+      'ZenBook 13 UX333', 'ZenBook 13 UX325', 'ZenBook 13 OLED UX325',
+      'ZenBook 14 UX425', 'ZenBook 14 UX433', 'ZenBook 14 UX3402', 'ZenBook 14 OLED UM3402',
+      'ZenBook 14X OLED UX5400', 'ZenBook 14X OLED UX3404',
+      'ZenBook 15 UX534', 'ZenBook 15 UX535',
+      'ZenBook Pro 14 Duo OLED UX8402',
+      'ZenBook Pro 15 UX535', 'ZenBook Pro 16X OLED UX7602',
+      'ZenBook Duo 14 UX482', 'ZenBook Flip 13 UX363',
+      // === ROG (Republic of Gamers) ===
+      'ROG Zephyrus G14 (2021)', 'ROG Zephyrus G14 (2022)', 'ROG Zephyrus G14 (2023)', 'ROG Zephyrus G14 (2024)',
+      'ROG Zephyrus G16 (2023)', 'ROG Zephyrus G16 (2024)',
+      'ROG Zephyrus M16 (2021)', 'ROG Zephyrus M16 (2022)',
+      'ROG Zephyrus S17 GX703',
+      'ROG Strix G15 (2021)', 'ROG Strix G15 (2022)', 'ROG Strix G15 (2023)',
+      'ROG Strix G16 (2023)', 'ROG Strix G16 (2024)',
+      'ROG Strix G17 (2022)', 'ROG Strix G17 (2023)',
+      'ROG Strix Scar 15 (2022)', 'ROG Strix Scar 16 (2023)', 'ROG Strix Scar 17 (2023)',
+      'ROG Flow X13 (2021)', 'ROG Flow X13 (2022)', 'ROG Flow X13 (2023)',
+      'ROG Flow X16 (2022)', 'ROG Flow Z13 (2022)',
+      'ROG Ally (2023)', 'ROG Ally X (2024)',
+      // === TUF Gaming ===
+      'TUF Gaming A15 FA506', 'TUF Gaming A15 FA507',
+      'TUF Gaming A16 FA617',
+      'TUF Gaming F15 FX506', 'TUF Gaming F15 FX507',
+      'TUF Gaming F17 FX706', 'TUF Gaming F17 FX707',
+      'TUF Gaming Dash F15 FX516', 'TUF Gaming Dash F15 FX517',
+      // === Chromebook & Lainnya ===
+      'ASUS Chromebook CX1', 'ASUS Chromebook CX9',
+      'ASUS BR1100', 'ASUS Laptop 14 L410',
+      // === Lainnya ===
+      'Lainnya (ASUS)'
+    ],
+    spek: [
+      'Intel Core i3-1215U, 8GB RAM, 256GB SSD',
+      'Intel Core i3-1315U, 8GB RAM, 256GB SSD',
+      'Intel Core i5-1235U, 8GB RAM, 512GB SSD',
+      'Intel Core i5-1335U, 8GB RAM, 512GB SSD',
+      'Intel Core i5-1335U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1255U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1355U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1355U, 16GB RAM, 1TB SSD',
+      'AMD Ryzen 5 5600H, 8GB RAM, 512GB SSD',
+      'AMD Ryzen 5 7535HS, 8GB RAM, 512GB SSD',
+      'AMD Ryzen 5 7535HS, 16GB RAM, 512GB SSD',
+      'AMD Ryzen 7 5800H, 16GB RAM, 512GB SSD',
+      'AMD Ryzen 7 6800H, 16GB RAM, 512GB SSD, RX 6600M',
+      'AMD Ryzen 9 7940HS, 16GB RAM, 1TB SSD, RTX 4060',
+      'AMD Ryzen 9 7945HX, 32GB RAM, 1TB SSD, RTX 4090',
+      'Intel Core i7-12700H, 16GB RAM, 512GB SSD, RTX 3060',
+      'Intel Core i7-13700H, 16GB RAM, 512GB SSD, RTX 4060',
+      'Intel Core i9-13980HX, 32GB RAM, 1TB SSD, RTX 4090',
+      'Spesifikasi Lainnya'
+    ]
+  },
+  'Acer': {
+    models: [
+      // === Aspire Series ===
+      'Aspire 3 A315-54', 'Aspire 3 A315-57', 'Aspire 3 A315-58', 'Aspire 3 A315-59',
+      'Aspire 3 A314-22', 'Aspire 3 A314-36',
+      'Aspire 5 A514-53', 'Aspire 5 A514-54', 'Aspire 5 A514-55', 'Aspire 5 A514-56',
+      'Aspire 5 A515-55', 'Aspire 5 A515-56', 'Aspire 5 A515-57', 'Aspire 5 A515-58',
+      'Aspire 7 A715-74', 'Aspire 7 A715-75', 'Aspire 7 A715-76',
+      'Aspire Vero AV14', 'Aspire Vero AV15',
+      // === TravelMate Series ===
+      'TravelMate P2 TMP214', 'TravelMate P2 TMP215', 'TravelMate P2 TMP216',
+      'TravelMate P4 TMP414', 'TravelMate P4 TMP416',
+      'TravelMate P6 TMP614', 'TravelMate P6 TMP616',
+      'TravelMate B3 TMB311', 'TravelMate B3 TMB314',
+      // === Swift Series ===
+      'Swift 1 SF114', 'Swift 3 SF313', 'Swift 3 SF314-43', 'Swift 3 SF314-54', 'Swift 3 SF314-55',
+      'Swift 3 SF314-59', 'Swift 3 SF314-512',
+      'Swift 5 SF514-55', 'Swift 5 SF514-56',
+      'Swift Edge SFE14', 'Swift Edge SFE16',
+      'Swift Go 14', 'Swift Go 16',
+      'Swift X SFX14-51', 'Swift X SFX14-71',
+      // === Nitro / Predator ===
+      'Nitro 5 AN515-55', 'Nitro 5 AN515-56', 'Nitro 5 AN515-57', 'Nitro 5 AN515-58',
+      'Nitro 5 AN515-46', 'Nitro 5 AN516-55',
+      'Nitro V ANV15-51', 'Nitro V ANV15-41',
+      'Predator Helios 300 PH315', 'Predator Helios 300 PH317',
+      'Predator Helios 16 PH16',
+      'Predator Helios 18 PH18',
+      'Predator Triton 300 PT315',
+      'Predator Triton 500 PT516',
+      // === ConceptD & Chromebook ===
+      'ConceptD 3 CN315', 'ConceptD 5 CN515',
+      'Acer Chromebook 314', 'Acer Chromebook Spin 714',
+      // === Lainnya ===
+      'Lainnya (Acer)'
+    ],
+    spek: [
+      'Intel Core i3-1215U, 8GB RAM, 256GB SSD',
+      'Intel Core i3-1315U, 8GB RAM, 256GB SSD',
+      'Intel Core i5-1235U, 8GB RAM, 512GB SSD',
+      'Intel Core i5-1335U, 8GB RAM, 512GB SSD',
+      'Intel Core i5-1335U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1255U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1355U, 16GB RAM, 512GB SSD',
+      'AMD Ryzen 5 5500U, 8GB RAM, 512GB SSD',
+      'AMD Ryzen 5 7530U, 16GB RAM, 512GB SSD',
+      'AMD Ryzen 7 5700U, 16GB RAM, 512GB SSD',
+      'AMD Ryzen 7 7730U, 16GB RAM, 512GB SSD',
+      'Intel Core i5-12500H, 16GB RAM, 512GB SSD, RTX 3050',
+      'Intel Core i5-13420H, 16GB RAM, 512GB SSD, RTX 3050',
+      'Intel Core i7-12700H, 16GB RAM, 512GB SSD, RTX 3060',
+      'Intel Core i7-13700H, 16GB RAM, 512GB SSD, RTX 4060',
+      'AMD Ryzen 7 6800H, 16GB RAM, 512GB SSD, RTX 3060',
+      'Spesifikasi Lainnya'
+    ]
+  },
+  'Apple': {
+    models: [
+      // === MacBook Air ===
+      'MacBook Air 11" (2011)', 'MacBook Air 11" (2012)', 'MacBook Air 11" (2013)', 'MacBook Air 11" (2015)',
+      'MacBook Air 13" (2012)', 'MacBook Air 13" (2013)', 'MacBook Air 13" (2015)',
+      'MacBook Air 13" (2017)', 'MacBook Air 13" (2018)', 'MacBook Air 13" (2019)', 'MacBook Air 13" (2020 Intel)',
+      'MacBook Air M1 13" (2020)', 'MacBook Air M2 13" (2022)', 'MacBook Air M2 15" (2023)',
+      'MacBook Air M3 13" (2024)', 'MacBook Air M3 15" (2024)',
+      // === MacBook Pro ===
+      'MacBook Pro 13" (2015)', 'MacBook Pro 13" (2016)', 'MacBook Pro 13" (2017)',
+      'MacBook Pro 13" (2018)', 'MacBook Pro 13" (2019)', 'MacBook Pro 13" (2020 Intel)',
+      'MacBook Pro 13" M1 (2020)', 'MacBook Pro 13" M2 (2022)',
+      'MacBook Pro 14" M1 Pro (2021)', 'MacBook Pro 14" M1 Max (2021)',
+      'MacBook Pro 14" M2 Pro (2023)', 'MacBook Pro 14" M2 Max (2023)',
+      'MacBook Pro 14" M3 (2023)', 'MacBook Pro 14" M3 Pro (2023)', 'MacBook Pro 14" M3 Max (2023)',
+      'MacBook Pro 15" (2015)', 'MacBook Pro 15" (2016)', 'MacBook Pro 15" (2017)',
+      'MacBook Pro 15" (2018)', 'MacBook Pro 15" (2019)',
+      'MacBook Pro 16" (2019 Intel)', 'MacBook Pro 16" (2020 Intel)',
+      'MacBook Pro 16" M1 Pro (2021)', 'MacBook Pro 16" M1 Max (2021)',
+      'MacBook Pro 16" M2 Pro (2023)', 'MacBook Pro 16" M2 Max (2023)',
+      'MacBook Pro 16" M3 Pro (2023)', 'MacBook Pro 16" M3 Max (2023)',
+      // === MacBook (Retina) ===
+      'MacBook 12" (2015)', 'MacBook 12" (2016)', 'MacBook 12" (2017)',
+      // === Lainnya ===
+      'Lainnya (Apple)'
+    ],
+    spek: [
+      'Apple M1, 8GB RAM, 256GB SSD',
+      'Apple M1, 8GB RAM, 512GB SSD',
+      'Apple M1, 16GB RAM, 512GB SSD',
+      'Apple M1 Pro, 16GB RAM, 512GB SSD',
+      'Apple M1 Pro, 16GB RAM, 1TB SSD',
+      'Apple M1 Max, 32GB RAM, 1TB SSD',
+      'Apple M2, 8GB RAM, 256GB SSD',
+      'Apple M2, 8GB RAM, 512GB SSD',
+      'Apple M2, 16GB RAM, 512GB SSD',
+      'Apple M2, 16GB RAM, 1TB SSD',
+      'Apple M2 Pro, 16GB RAM, 512GB SSD',
+      'Apple M2 Pro, 16GB RAM, 1TB SSD',
+      'Apple M2 Max, 32GB RAM, 1TB SSD',
+      'Apple M3, 8GB RAM, 256GB SSD',
+      'Apple M3, 8GB RAM, 512GB SSD',
+      'Apple M3, 16GB RAM, 512GB SSD',
+      'Apple M3 Pro, 18GB RAM, 512GB SSD',
+      'Apple M3 Pro, 18GB RAM, 1TB SSD',
+      'Apple M3 Max, 36GB RAM, 1TB SSD',
+      'Intel Core i5 (Intel), 8GB RAM, 256GB SSD',
+      'Intel Core i7 (Intel), 16GB RAM, 512GB SSD',
+      'Spesifikasi Lainnya'
+    ]
+  },
+  'MSI': {
+    models: [
+      // === Modern / Prestige (Bisnis/Tipis) ===
+      'Modern 14 B10M', 'Modern 14 B11M', 'Modern 14 B11SB', 'Modern 14 C12M', 'Modern 14 C13M',
+      'Modern 15 A10M', 'Modern 15 A11M', 'Modern 15 B12M', 'Modern 15 B13M',
+      'Prestige 13 Evo A12M', 'Prestige 13 Evo A13M', 'Prestige 14 Evo A12M',
+      'Prestige 14 AI Evo C1M', 'Prestige 15 A11SCS', 'Prestige 16 AI Studio B1V',
+      // === Creator Series ===
+      'Creator 15 M16T', 'Creator 17 A10SF',
+      'Creator Z16 B12U', 'Creator Z16P B12U', 'Creator Z17 HX Studio B13V',
+      'Creator M16 B12U',
+      // === Gaming — Katana / Cyborg ===
+      'Katana GF66 11U', 'Katana GF76 11U',
+      'Katana 15 B12V', 'Katana 15 B13V', 'Katana 17 B12V',
+      'Cyborg 14 A13V', 'Cyborg 15 A12V', 'Cyborg 15 A13V',
+      // === Gaming — Thin GF ===
+      'Thin GF63 10SC', 'Thin GF63 11SC', 'Thin GF63 11UC', 'Thin GF63 12V', 'Thin GF63 12UC',
+      // === Pulse / Sword ===
+      'Pulse GL66 11U', 'Pulse GL76 11U', 'Pulse GL66 12U', 'Pulse 15 B13V',
+      'Sword 15 A11U', 'Sword 17 A11U',
+      // === Stealth ===
+      'Stealth 14 A13V', 'Stealth 15 A13V', 'Stealth 16 AI Studio A1V',
+      // === Raider / Titan / Vector ===
+      'Raider GE66 11U', 'Raider GE76 12U', 'Raider GE78 HX 13V',
+      'Titan GT76 10SF', 'Titan GT77 HX 13V', 'Titan 18 HX A13V',
+      'Vector GP66 12U', 'Vector GP76 12U', 'Vector GP77 13V', 'Vector GP68 HX 13V',
+      // === Crosshair ===
+      'Crosshair 15 R6E', 'Crosshair 17 R6E',
+      // === Lainnya ===
+      'Lainnya (MSI)'
+    ],
+    spek: [
+      'Intel Core i5-1235U, 8GB RAM, 512GB SSD',
+      'Intel Core i5-1335U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1255U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1355U, 16GB RAM, 512GB SSD',
+      'Intel Core i5-12450H, 8GB RAM, 512GB SSD, RTX 2050',
+      'Intel Core i5-12500H, 16GB RAM, 512GB SSD, RTX 3050',
+      'Intel Core i7-12700H, 16GB RAM, 512GB SSD, RTX 3060',
+      'Intel Core i7-12700H, 16GB RAM, 512GB SSD, RTX 3070Ti',
+      'Intel Core i7-13620H, 16GB RAM, 512GB SSD, RTX 4060',
+      'Intel Core i7-13700H, 16GB RAM, 512GB SSD, RTX 4060',
+      'Intel Core i9-13980HX, 32GB RAM, 1TB SSD, RTX 4070Ti',
+      'Intel Core i9-13950HX, 32GB RAM, 2TB SSD, RTX 4090',
+      'AMD Ryzen 7 7745HX, 16GB RAM, 1TB SSD, RTX 4070',
+      'Spesifikasi Lainnya'
+    ]
+  },
+  'Toshiba': {
+    models: [
+      // === Seri Lama (Toshiba) ===
+      'Toshiba Satellite C640', 'Toshiba Satellite C650', 'Toshiba Satellite C800', 'Toshiba Satellite C840',
+      'Toshiba Satellite L640', 'Toshiba Satellite L645', 'Toshiba Satellite L740', 'Toshiba Satellite L745',
+      'Toshiba Satellite L840', 'Toshiba Satellite L845',
+      'Toshiba Satellite Pro C640', 'Toshiba Satellite Pro L840',
+      'Toshiba Portege Z30', 'Toshiba Portege Z930', 'Toshiba Portege X30',
+      'Toshiba Tecra A40', 'Toshiba Tecra A50', 'Toshiba Tecra Z40',
+      // === Dynabook (pengganti Toshiba) ===
+      'Dynabook Satellite Pro C40', 'Dynabook Satellite Pro C50', 'Dynabook Satellite Pro C70',
+      'Dynabook Satellite Pro L50',
+      'Dynabook Tecra A40-J', 'Dynabook Tecra A50-J', 'Dynabook Tecra A50-K',
+      'Dynabook Tecra X40-F', 'Dynabook Tecra X50-F', 'Dynabook Tecra X50-G',
+      'Dynabook Portege X30-F', 'Dynabook Portege X30-G', 'Dynabook Portege X30L-J',
+      'Dynabook Portege Z30-F', 'Dynabook Portege Z40-J',
+      'Dynabook Satellite Pro C40-H', 'Dynabook Satellite Pro C50-H',
+      // === Lainnya ===
+      'Lainnya (Toshiba/Dynabook)'
+    ],
+    spek: [
+      'Intel Core i3-1115G4, 4GB RAM, 256GB SSD',
+      'Intel Core i3-1215U, 8GB RAM, 256GB SSD',
+      'Intel Core i5-1135G7, 8GB RAM, 256GB SSD',
+      'Intel Core i5-1235U, 8GB RAM, 512GB SSD',
+      'Intel Core i5-1235U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1165G7, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1255U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1355U, 16GB RAM, 512GB SSD',
+      'Spesifikasi Lainnya'
+    ]
+  },
+  'Samsung': {
+    models: [
+      // === Galaxy Book Series ===
+      'Galaxy Book (2021)', 'Galaxy Book Odyssey (2021)',
+      'Galaxy Book2 (2022)', 'Galaxy Book2 Business', 'Galaxy Book2 Pro 13"', 'Galaxy Book2 Pro 15"',
+      'Galaxy Book2 Pro 360 13"', 'Galaxy Book2 Pro 360 15"',
+      'Galaxy Book3 (2023)', 'Galaxy Book3 Ultra', 'Galaxy Book3 Pro 14"', 'Galaxy Book3 Pro 16"',
+      'Galaxy Book3 Pro 360 16"', 'Galaxy Book3 360 13"', 'Galaxy Book3 360 15"',
+      'Galaxy Book3 Edge',
+      'Galaxy Book4 (2024)', 'Galaxy Book4 Ultra', 'Galaxy Book4 Pro 14"', 'Galaxy Book4 Pro 16"',
+      'Galaxy Book4 Pro 360', 'Galaxy Book4 360 15"', 'Galaxy Book4 Edge',
+      // === Seri Lama ===
+      'Samsung Notebook 5', 'Samsung Notebook 7', 'Samsung Notebook 7 Force',
+      'Samsung Notebook 9 (2019)', 'Samsung Notebook 9 Pro',
+      'Samsung Notebook Flash', 'Samsung Notebook Odyssey',
+      // === Lainnya ===
+      'Lainnya (Samsung)'
+    ],
+    spek: [
+      'Intel Core i5-1235U, 8GB RAM, 256GB SSD',
+      'Intel Core i5-1335U, 8GB RAM, 256GB SSD',
+      'Intel Core i5-1335U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1255U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1355U, 16GB RAM, 512GB SSD',
+      'Intel Core i7-1355U, 16GB RAM, 1TB SSD',
+      'Intel Core i7-13700H, 16GB RAM, 512GB SSD, RTX 3050',
+      'Intel Core i9-13900H, 32GB RAM, 1TB SSD, RTX 4070',
+      'Snapdragon X Elite, 16GB RAM, 512GB SSD',
+      'Spesifikasi Lainnya'
+    ]
+  },
+  'Lainnya': {
+    models: [
+      // === Huawei ===
+      'Huawei MateBook D14', 'Huawei MateBook D15', 'Huawei MateBook D16',
+      'Huawei MateBook 14', 'Huawei MateBook 14s', 'Huawei MateBook 16s',
+      'Huawei MateBook X Pro',
+      // === Xiaomi ===
+      'Xiaomi Mi Notebook 14', 'Xiaomi Mi Notebook 15', 'Xiaomi Mi Notebook Pro',
+      'Xiaomi Book S 12.4', 'Xiaomi Notebook Air 13',
+      // === LG ===
+      'LG Gram 14', 'LG Gram 15', 'LG Gram 16', 'LG Gram 17',
+      'LG Gram 2-in-1 14', 'LG Gram 360 14', 'LG Gram Pro 16',
+      // === Razer ===
+      'Razer Blade 14 (2022)', 'Razer Blade 14 (2023)', 'Razer Blade 14 (2024)',
+      'Razer Blade 15 (2022)', 'Razer Blade 15 (2023)',
+      'Razer Blade 16 (2023)', 'Razer Blade 18 (2023)',
+      // === Gigabyte / AORUS ===
+      'AORUS 15 (2022)', 'AORUS 15 (2023)', 'AORUS 17 (2023)',
+      'Gigabyte G5 KE', 'Gigabyte G5 MF', 'Gigabyte G6 KF',
+      // === Axioo / Advan (Lokal) ===
+      'Axioo Pico CJM', 'Axioo Neon HNM', 'Axioo Mybook 14F', 'Axioo Hype 5 AMD',
+      'Advan WorkPro 14', 'Advan Workplus', 'Advan Soulmate i4',
+      // === Lainnya Umum ===
+      'Lainnya / Custom'
+    ],
+    spek: [
+      'Intel Core i3, 4GB RAM, 128GB SSD',
+      'Intel Core i3, 8GB RAM, 256GB SSD',
+      'Intel Core i5, 8GB RAM, 512GB SSD',
+      'Intel Core i5, 16GB RAM, 512GB SSD',
+      'Intel Core i7, 16GB RAM, 512GB SSD',
+      'Intel Core i7, 16GB RAM, 1TB SSD',
+      'AMD Ryzen 5, 8GB RAM, 512GB SSD',
+      'AMD Ryzen 7, 16GB RAM, 512GB SSD',
+      'Spesifikasi Lainnya'
+    ]
+  }
+};
+
+
+const SPEK_UMUM = [
+  '— Pilih Spesifikasi —',
+  'Intel Core i3-1315U, 8GB RAM, 256GB SSD',
+  'Intel Core i5-1235U, 8GB RAM, 512GB SSD',
+  'Intel Core i5-1335U, 8GB RAM, 512GB SSD',
+  'Intel Core i5-1335U, 16GB RAM, 512GB SSD',
+  'Intel Core i7-1355U, 16GB RAM, 512GB SSD',
+  'Intel Core i7-1355U, 16GB RAM, 1TB SSD',
+  'AMD Ryzen 5 7530U, 8GB RAM, 512GB SSD',
+  'AMD Ryzen 5 7530U, 16GB RAM, 512GB SSD',
+  'AMD Ryzen 7 7730U, 16GB RAM, 512GB SSD',
+  'Intel Core i5-13420H, 16GB RAM, 512GB SSD, RTX 3050',
+  'Intel Core i7-13700H, 16GB RAM, 512GB SSD, RTX 4060',
+  'Intel Core i7-13700H, 32GB RAM, 1TB SSD, RTX 4070',
+  'Spesifikasi Lainnya'
+];
+
+function populateSpekSelect(prefix, spekList, currentVal) {
+  const sel = document.getElementById(prefix + '-spek');
+  if (!sel) return;
+  sel.innerHTML = spekList.map(s =>
+    `<option value="${s === '— Pilih Spesifikasi —' ? '' : s}" ${currentVal && currentVal === s ? 'selected' : ''}>${s}</option>`
+  ).join('');
+}
+
+function onMerkChange(prefix) {
+  const merk = document.getElementById(prefix + '-merk').value;
+  const namaSel = document.getElementById(prefix + '-nama');
+  const spekSel = document.getElementById(prefix + '-spek');
+
+  if (!merk || !KATALOG[merk]) {
+    namaSel.innerHTML = '<option value="">— Pilih Merk dulu —</option>';
+    if (spekSel) populateSpekSelect(prefix, ['— Pilih Spesifikasi —'], '');
+    return;
+  }
+
+  const models = KATALOG[merk].models;
+  namaSel.innerHTML = '<option value="">— Pilih Model —</option>' +
+    models.map(m => `<option value="${m}">${m}</option>`).join('');
+
+  if (spekSel) populateSpekSelect(prefix, ['— Pilih Spesifikasi —', ...KATALOG[merk].spek], '');
+}
+
+function onNamaChange(prefix) {
+  const merk = document.getElementById(prefix + '-merk').value;
+  const namaVal = document.getElementById(prefix + '-nama').value;
+  const customInput = document.getElementById(prefix + '-nama-custom');
+
+  // Tampilkan input manual jika pilih "Lainnya (...)"
+  if (customInput) {
+    if (namaVal && namaVal.startsWith('Lainnya')) {
+      customInput.style.display = 'block';
+      customInput.focus();
+    } else {
+      customInput.style.display = 'none';
+      customInput.value = '';
+    }
+  }
+
+  if (!merk || !KATALOG[merk]) return;
+  const spekSel = document.getElementById(prefix + '-spek');
+  if (spekSel) populateSpekSelect(prefix, ['— Pilih Spesifikasi —', ...KATALOG[merk].spek], '');
+}
+
+function onSpekChange(prefix) {
+  const val = document.getElementById(prefix + '-spek').value;
+  const customInput = document.getElementById(prefix + '-spek-custom');
+  if (!customInput) return;
+  if (val === 'Spesifikasi Lainnya' || val === '') {
+    if (val === 'Spesifikasi Lainnya') {
+      customInput.style.display = 'block';
+      customInput.focus();
+    } else {
+      customInput.style.display = 'none';
+    }
+  } else {
+    customInput.style.display = 'none';
+  }
+}
+
+function getNamaValue(prefix) {
+  const sel = document.getElementById(prefix + '-nama');
+  const custom = document.getElementById(prefix + '-nama-custom');
+  if (sel && sel.value && sel.value.startsWith('Lainnya') && custom && custom.value.trim()) {
+    return custom.value.trim();
+  }
+  return sel ? sel.value : '';
+}
+
+function getSpekValue(prefix) {
+  const sel = document.getElementById(prefix + '-spek');
+  const custom = document.getElementById(prefix + '-spek-custom');
+  if (sel && sel.value === 'Spesifikasi Lainnya' && custom && custom.value.trim()) {
+    return custom.value.trim();
+  }
+  return sel ? sel.value : '';
+}
+
+function initEditDropdowns(d) {
+  const merk = d.merk;
+  const namaSel = document.getElementById('e-nama');
+  const spekSel = document.getElementById('e-spek');
+  const namaCustom = document.getElementById('e-nama-custom');
+  const spekCustom = document.getElementById('e-spek-custom');
+
+  if (KATALOG[merk]) {
+    const models = KATALOG[merk].models;
+    // Jika nama tersimpan tidak ada di katalog, tandai sebagai custom
+    const isCustomNama = !models.includes(d.nama) && d.nama;
+    const allModels = isCustomNama ? ['Lainnya (' + merk + ')', ...models] : models;
+    namaSel.innerHTML = '<option value="">— Pilih Model —</option>' +
+      allModels.map(m => `<option value="${m}" ${m === d.nama ? 'selected' : (isCustomNama && m === 'Lainnya (' + merk + ')' ? 'selected' : '')}>${m}</option>`).join('');
+    // Jika custom, tampilkan input dan isi dengan nilai tersimpan
+    if (isCustomNama && namaCustom) {
+      namaCustom.style.display = 'block';
+      namaCustom.value = d.nama;
+    } else if (namaCustom) {
+      namaCustom.style.display = 'none';
+      namaCustom.value = '';
+    }
+
+    const spekList = KATALOG[merk].spek;
+    const isCustomSpek = d.spek && !spekList.includes(d.spek);
+    const allSpek = isCustomSpek ? [d.spek, ...spekList] : spekList;
+    populateSpekSelect('e', ['— Pilih Spesifikasi —', ...allSpek], d.spek || '');
+    if (isCustomSpek && spekCustom) {
+      // Pilih "Spesifikasi Lainnya" dan isi custom input
+      const spekLainOpt = Array.from(spekSel.options).find(o => o.value === 'Spesifikasi Lainnya');
+      if (!spekLainOpt) {
+        const opt = new Option('Spesifikasi Lainnya', 'Spesifikasi Lainnya');
+        spekSel.appendChild(opt);
+      }
+      spekSel.value = 'Spesifikasi Lainnya';
+      spekCustom.style.display = 'block';
+      spekCustom.value = d.spek;
+    }
+  } else {
+    namaSel.innerHTML = `<option value="Lainnya" selected>Lainnya</option>`;
+    if (namaCustom) { namaCustom.style.display = 'block'; namaCustom.value = d.nama || ''; }
+    if (spekSel) spekSel.innerHTML = `<option value="${d.spek||''}" selected>${d.spek||'— Pilih Spesifikasi —'}</option>`;
+  }
+}
+
+// ===== DATA =====
+let data = JSON.parse(localStorage.getItem('laptop-barang') || '[]');
+let uploadedPhotos = []; // base64 array for current form
+let editId = null;
+let editPhotos = [];
+
+// ===== INIT =====
+document.getElementById('f-tanggal').value = new Date().toISOString().split('T')[0];
+renderTable();
+updateSummary();
+
+// ===== PHOTO UPLOAD =====
+function handlePhotoUpload(e) {
+  const files = Array.from(e.target.files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      uploadedPhotos.push(ev.target.result);
+      renderPhotoPreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPhotoPreviews() {
+  const preview = document.getElementById('photo-preview');
+  const placeholder = document.getElementById('photo-placeholder');
+  if (uploadedPhotos.length) {
+    placeholder.style.display = 'none';
+    preview.innerHTML = uploadedPhotos.map((p, i) =>
+      `<img class="photo-thumb" src="${p}" onclick="openFoto('${p}')">`
+    ).join('');
+  } else {
+    placeholder.style.display = '';
+    preview.innerHTML = '';
+  }
+}
+
+// ===== SAVE =====
+function simpanBarang() {
+  const tanggal = document.getElementById('f-tanggal').value;
+  const nama = getNamaValue('f');
+  const merk = document.getElementById('f-merk').value;
+  const serial = document.getElementById('f-serial').value.trim();
+  const jumlah = parseInt(document.getElementById('f-jumlah').value) || 1;
+  const kondisi = document.getElementById('f-kondisi').value;
+  const penerima = document.getElementById('f-penerima').value.trim();
+
+  if (!tanggal || !nama || !merk || !serial || !jumlah || !kondisi || !penerima) {
+    toast('Lengkapi semua field bertanda *', 'error'); return;
+  }
+
+  const item = {
+    id: Date.now().toString(),
+    tanggal, nama, merk, serial,
+    jumlah: typeof jumlah === 'number' ? jumlah : parseInt(jumlah),
+    kondisi, penerima,
+    nopd: document.getElementById('f-nopd').value.trim(),
+    vendor: document.getElementById('f-vendor').value.trim(),
+    spek: getSpekValue('f'),
+    catatan: document.getElementById('f-catatan').value.trim(),
+    photos: [...uploadedPhotos]
+  };
+
+  data.unshift(item);
+  saveData();
+  renderTable();
+  updateSummary();
+  resetForm();
+  toast('✅ Barang berhasil disimpan!', 'success');
+}
+
+// ===== RESET FORM =====
+function resetForm() {
+  ['f-nopd','f-nama','f-serial','f-vendor','f-spek','f-catatan'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-merk').value = '';
+  document.getElementById('f-nama').innerHTML = '<option value="">— Pilih Merk dulu —</option>';
+  const fNamaCustom = document.getElementById('f-nama-custom');
+  if (fNamaCustom) { fNamaCustom.style.display = 'none'; fNamaCustom.value = ''; }
+  document.getElementById('f-spek').innerHTML = '<option value="">— Pilih Merk dulu —</option>';
+  document.getElementById('f-spek-custom').style.display = 'none';
+  document.getElementById('f-spek-custom').value = '';
+  document.getElementById('f-kondisi').value = '';
+  document.getElementById('f-jumlah').value = '1';
+  document.getElementById('f-penerima').value = '';
+  document.getElementById('f-tanggal').value = new Date().toISOString().split('T')[0];
+  document.getElementById('f-foto').value = '';
+  uploadedPhotos = [];
+  renderPhotoPreviews();
+  document.getElementById('photo-placeholder').style.display = '';
+}
+
+// ===== RENDER TABLE =====
+function renderTable() {
+  const search = document.getElementById('search').value.toLowerCase();
+  const fKondisi = document.getElementById('filter-kondisi').value;
+  const fMerk = document.getElementById('filter-merk').value;
+  const fFrom = document.getElementById('filter-date-from').value;
+  const fTo = document.getElementById('filter-date-to').value;
+
+  let filtered = data.filter(d => {
+    const matchSearch = !search || d.nama.toLowerCase().includes(search) ||
+      d.serial.toLowerCase().includes(search) || d.merk.toLowerCase().includes(search) ||
+      (d.vendor||'').toLowerCase().includes(search) || (d.penerima||'').toLowerCase().includes(search);
+    const matchKondisi = !fKondisi || d.kondisi === fKondisi;
+    const matchMerk = !fMerk || d.merk === fMerk;
+    const matchFrom = !fFrom || d.tanggal >= fFrom;
+    const matchTo = !fTo || d.tanggal <= fTo;
+    return matchSearch && matchKondisi && matchMerk && matchFrom && matchTo;
+  });
+
+  const tbody = document.getElementById('table-body');
+  const empty = document.getElementById('empty-state');
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map((d, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td>${d.photos && d.photos.length ? `<img class="thumb-small" src="${d.photos[0]}" onclick="openFoto('${d.photos[0]}')" title="Klik untuk besar">` : '<div class="no-photo">📷</div>'}</td>
+      <td>${formatDate(d.tanggal)}</td>
+      <td>${d.nopd||'-'}</td>
+      <td><strong>${d.nama}</strong>${d.spek ? `<br><small style="color:var(--text-muted)">${d.spek}</small>` : ''}</td>
+      <td>${d.merk}</td>
+      <td><code style="font-size:0.8rem;background:#EEF0FF;padding:2px 6px;border-radius:4px;">${d.serial}</code></td>
+      <td style="text-align:center;font-weight:700;">${d.jumlah}</td>
+      <td>${badgeKondisi(d.kondisi)}</td>
+      <td>${d.penerima}</td>
+      <td>${d.vendor||'-'}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-primary btn-sm" onclick="lihatDetail('${d.id}')" title="Lihat Detail">👁️</button>
+          <button class="btn btn-warning btn-sm" onclick="editBarang('${d.id}')" title="Edit">✏️</button>
+          <button class="btn btn-accent btn-sm" onclick="cetakItem('${d.id}')" title="Cetak / PDF">🖨️</button>
+          <button class="btn btn-secondary btn-sm" onclick="duplikatBarang('${d.id}')" title="Duplikat">📋</button>
+          <button class="btn btn-danger btn-sm" onclick="hapusBarang('${d.id}')" title="Hapus">🗑️</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function badgeKondisi(k) {
+  if (k === 'Baru') return `<span class="badge badge-baru">✅ Baru</span>`;
+  if (k === 'Rusak / Perlu Servis') return `<span class="badge badge-rusak">⚠️ Rusak</span>`;
+  if (k === 'Second' || k === 'Refurbished') return `<span class="badge badge-second">🔁 Second</span>`;
+  return `<span class="badge badge-second">🔁 Second</span>`;
+}
+
+function formatDate(d) {
+  if (!d) return '-';
+  const [y,m,day] = d.split('-');
+  return `${day}/${m}/${y}`;
+}
+
+// ===== SUMMARY =====
+function updateSummary() {
+  document.getElementById('s-total').textContent = data.reduce((a,d) => a+d.jumlah, 0);
+  document.getElementById('s-baru').textContent = data.filter(d=>d.kondisi==='Baru').reduce((a,d)=>a+d.jumlah,0);
+  document.getElementById('s-rusak').textContent = data.filter(d=>d.kondisi==='Rusak / Perlu Servis').reduce((a,d)=>a+d.jumlah,0);
+  document.getElementById('s-second').textContent = data.filter(d=>d.kondisi==='Second'||d.kondisi==='Refurbished').reduce((a,d)=>a+d.jumlah,0);
+}
+
+// ===== DETAIL MODAL =====
+function lihatDetail(id) {
+  const d = data.find(x => x.id === id);
+  if (!d) return;
+  document.getElementById('modal-detail-content').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      ${row('Tanggal', formatDate(d.tanggal))}
+      ${row('No. Dokumen', d.nopd||'-')}
+      ${row('Nama / Model', d.nama)}
+      ${row('Merk', d.merk)}
+      ${row('Serial Number', `<code>${d.serial}</code>`)}
+      ${row('Jumlah', d.jumlah+' unit')}
+      ${row('Kondisi', badgeKondisi(d.kondisi))}
+      ${row('Spesifikasi', d.spek||'-')}
+      ${row('Penerima', d.penerima)}
+      ${row('Vendor / Pengirim', d.vendor||'-')}
+      ${row('Catatan', d.catatan||'-')}
+    </div>
+    ${d.photos && d.photos.length ? `<div style="margin-top:16px;"><strong style="font-size:.83rem;color:var(--text-muted)">FOTO BARANG</strong><div class="modal-photo-gallery" style="margin-top:8px;">${d.photos.map(p=>`<img src="${p}" onclick="openFoto('${p}')" style="cursor:zoom-in;">`).join('')}</div></div>` : ''}
+  `;
+  document.getElementById('modal-detail').classList.add('active');
+}
+
+function row(label, val) {
+  return `<div class="modal-row"><span class="modal-label">${label}</span><span class="modal-value">${val}</span></div>`;
+}
+
+// ===== EDIT MODAL =====
+function editBarang(id) {
+  const d = data.find(x => x.id === id);
+  if (!d) return;
+  editId = id;
+  editPhotos = d.photos ? [...d.photos] : [];
+
+  document.getElementById('edit-form-content').innerHTML = `
+    <div class="form-group"><label>Tanggal *</label><input type="date" id="e-tanggal" value="${d.tanggal}"></div>
+    <div class="form-group"><label>No. Dokumen</label><input type="text" id="e-nopd" value="${d.nopd||''}"></div>
+    <div class="form-group"><label>Merk *</label>
+      <select id="e-merk" onchange="onMerkChange('e')">
+        ${['Lenovo','HP','Dell','ASUS','Acer','Apple','MSI','Toshiba','Samsung','Lainnya'].map(m=>`<option ${d.merk===m?'selected':''} value="${m}">${m}</option>`).join('')}
+      </select></div>
+    <div class="form-group"><label>Nama / Model *</label>
+      <select id="e-nama" onchange="onNamaChange('e')">
+        <option value="${d.nama}" selected>${d.nama}</option>
+      </select>
+      <input type="text" id="e-nama-custom" placeholder="✏️ Ketik nama model manual..." style="display:none;margin-top:6px;padding:10px 14px;border:1.5px solid var(--primary);border-radius:8px;font-size:0.93rem;width:100%;background:#FAFAFF;outline:none;">
+      </div>
+    <div class="form-group"><label>Serial Number *</label><input type="text" id="e-serial" value="${d.serial}"></div>
+    <div class="form-group"><label>Jumlah *</label>
+      <select id="e-jumlah">
+        ${[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,25,30,50].map(n=>`<option value="${n}" ${d.jumlah===n?'selected':''}>${n} Unit</option>`).join('')}
+      </select></div>
+    <div class="form-group"><label>Kondisi *</label>
+      <select id="e-kondisi">
+        <option ${d.kondisi==='Baru'?'selected':''} value="Baru">Baru</option>
+        <option ${d.kondisi==='Second'?'selected':''} value="Second">Second</option>
+        <option ${d.kondisi==='Rusak / Perlu Servis'?'selected':''} value="Rusak / Perlu Servis">Rusak / Perlu Servis</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Penerima *</label><input type="text" id="e-penerima" value="${d.penerima}"></div>
+    <div class="form-group"><label>Vendor</label><input type="text" id="e-vendor" value="${d.vendor||''}"></div>
+    <div class="form-group"><label>Spesifikasi</label>
+      <select id="e-spek" onchange="onSpekChange('e')">
+        <option value="${d.spek||''}" selected>${d.spek||'— Pilih Spesifikasi —'}</option>
+      </select>
+      <input type="text" id="e-spek-custom" placeholder="Tulis spesifikasi manual..." style="display:none;margin-top:6px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.93rem;width:100%;"></div>
+    <div class="form-group full"><label>Catatan</label><textarea id="e-catatan">${d.catatan||''}</textarea></div>
+    <div class="form-group full">
+      <label>Foto (${editPhotos.length} foto)</label>
+      <div class="photo-upload-area" onclick="document.getElementById('e-foto').click()">
+        <input type="file" id="e-foto" multiple accept="image/*" onchange="handleEditPhoto(event)">
+        <div>📷 Upload foto tambahan</div>
+        <div class="photo-preview" id="edit-photo-preview">${editPhotos.map(p=>`<img class="photo-thumb" src="${p}">`).join('')}</div>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-edit').classList.add('active');
+  setTimeout(() => initEditDropdowns(d), 0);
+}
+
+function handleEditPhoto(e) {
+  Array.from(e.target.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      editPhotos.push(ev.target.result);
+      document.getElementById('edit-photo-preview').innerHTML = editPhotos.map(p=>`<img class="photo-thumb" src="${p}">`).join('');
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function simpanEdit() {
+  const idx = data.findIndex(x => x.id === editId);
+  if (idx === -1) return;
+  const tanggal = document.getElementById('e-tanggal').value;
+  const nama = getNamaValue('e');
+  const merk = document.getElementById('e-merk').value;
+  const serial = document.getElementById('e-serial').value.trim();
+  const jumlah = parseInt(document.getElementById('e-jumlah').value) || 1;
+  const kondisi = document.getElementById('e-kondisi').value;
+  const penerima = document.getElementById('e-penerima').value.trim();
+  if (!tanggal || !nama || !merk || !serial || !jumlah || !kondisi || !penerima) {
+    toast('Lengkapi semua field bertanda *', 'error'); return;
+  }
+  data[idx] = { ...data[idx], tanggal, nama, merk, serial, jumlah, kondisi, penerima,
+    nopd: document.getElementById('e-nopd').value.trim(),
+    vendor: document.getElementById('e-vendor').value.trim(),
+    spek: getSpekValue('e'),
+    catatan: document.getElementById('e-catatan').value.trim(),
+    photos: editPhotos
+  };
+  saveData(); renderTable(); updateSummary();
+  closeModal('modal-edit');
+  toast('✅ Data berhasil diperbarui!', 'success');
+}
+
+// ===== DELETE =====
+function hapusBarang(id) {
+  if (!confirm('Hapus data barang ini?')) return;
+  data = data.filter(d => d.id !== id);
+  saveData(); renderTable(); updateSummary();
+  toast('🗑️ Data berhasil dihapus.', 'info');
+}
+
+function hapusSemua() {
+  if (!data.length) { toast('Tidak ada data untuk dihapus.', 'error'); return; }
+  if (!confirm('Hapus SEMUA data? Tindakan ini tidak dapat dibatalkan.')) return;
+  data = [];
+  saveData(); renderTable(); updateSummary();
+  toast('🗑️ Semua data berhasil dihapus.', 'info');
+}
+
+// ===== FOTO MODAL =====
+function openFoto(src) {
+  document.getElementById('modal-foto-img').src = src;
+  document.getElementById('modal-foto').classList.add('active');
+}
+
+// ===== MODAL CLOSE =====
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
+});
+
+// ===== SAVE TO LOCAL STORAGE =====
+function saveData() {
+  localStorage.setItem('laptop-barang', JSON.stringify(data));
+}
+
+// ===== EXPORT CSV =====
+function exportCSV() {
+  if (!data.length) { toast('Tidak ada data untuk diekspor.', 'error'); return; }
+  const headers = ['No','Tanggal','No.Dokumen','Nama/Model','Merk','Serial Number','Jumlah','Kondisi','Spesifikasi','Penerima','Vendor','Catatan'];
+  const rows = data.map((d, i) => [
+    i+1, d.tanggal, d.nopd||'', d.nama, d.merk, d.serial, d.jumlah, d.kondisi, d.spek||'', d.penerima, d.vendor||'', d.catatan||''
+  ]);
+  const csvContent = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csvContent], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `barang-masuk-laptop-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  toast('✅ CSV berhasil diunduh!', 'success');
+}
+
+// ===== CETAK PDF PER ITEM =====
+function cetakItem(id) {
+  const d = data.find(x => x.id === id);
+  if (!d) return;
+
+  const fotoHTML = d.photos && d.photos.length
+    ? d.photos.map(p => `<img src="${p}" style="width:120px;height:90px;object-fit:cover;border-radius:6px;border:1.5px solid #ddd;margin:4px;">`).join('')
+    : '<span style="color:#999;font-size:0.85rem;">Tidak ada foto</span>';
+
+  const badgeMap = {
+    'Baru': 'background:#E6FBF4;color:#1AA87A;',
+    'Second': 'background:#EEF6FF;color:#2B7CC7;',
+    'Rusak / Perlu Servis': 'background:#FFF0F0;color:#E53E3E;'
+  };
+  const badgeStyle = badgeMap[d.kondisi] || 'background:#EEF0FF;color:#555;';
+
+  const win = window.open('', '_blank', 'width=800,height=700');
+  win.document.write(`<!DOCTYPE html>
+<html lang="id"><head>
+<meta charset="UTF-8">
+<title>Cetak Barang — ${d.nama}</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI',Arial,sans-serif; color:#1a1a2e; background:#fff; padding:32px; }
+  .print-header { display:flex; align-items:center; justify-content:space-between; border-bottom:3px solid #6C63FF; padding-bottom:12px; margin-bottom:20px; }
+  .print-title { font-size:1.1rem; font-weight:800; color:#6C63FF; }
+  .print-sub { font-size:0.8rem; color:#888; margin-top:2px; }
+  .logo { font-size:2rem; }
+  .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 24px; margin-bottom:20px; }
+  .info-row { display:flex; flex-direction:column; padding:8px 10px; background:#F7F8FF; border-radius:6px; border-left:3px solid #6C63FF; }
+  .info-row.full { grid-column:1/-1; }
+  .info-label { font-size:0.72rem; font-weight:700; color:#8888A0; text-transform:uppercase; letter-spacing:0.5px; }
+  .info-value { font-size:0.93rem; font-weight:600; color:#1a1a2e; margin-top:2px; }
+  .badge-print { display:inline-block; padding:3px 12px; border-radius:20px; font-weight:700; font-size:0.85rem; }
+  .foto-section { margin-top:16px; }
+  .foto-section h4 { font-size:0.8rem; font-weight:700; color:#8888A0; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; border-bottom:1px solid #E0E0F0; padding-bottom:6px; }
+  .foto-wrap { display:flex; flex-wrap:wrap; gap:8px; }
+  .footer-print { margin-top:28px; border-top:1px solid #ddd; padding-top:12px; display:flex; justify-content:space-between; font-size:0.75rem; color:#999; }
+  .ttd-area { display:grid; grid-template-columns:1fr 1fr; gap:40px; margin-top:32px; }
+  .ttd-box { text-align:center; }
+  .ttd-line { border-top:1px solid #333; margin-top:50px; padding-top:4px; font-size:0.8rem; color:#555; }
+  @media print {
+    body { padding:16px; }
+    button { display:none !important; }
+  }
+</style>
+</head><body>
+<div class="print-header">
+  <div>
+    <div class="print-title">💻 BERITA ACARA PENERIMAAN BARANG</div>
+    <div class="print-sub">Pencatatan Barang Masuk — TulusTeknoRent</div>
+  </div>
+  <div class="logo">📦</div>
+</div>
+
+<div class="info-grid">
+  <div class="info-row"><span class="info-label">Tanggal Penerimaan</span><span class="info-value">${formatDate(d.tanggal)}</span></div>
+  <div class="info-row"><span class="info-label">No. Resi / Dokumen</span><span class="info-value">${d.nopd||'—'}</span></div>
+  <div class="info-row"><span class="info-label">Nama / Model</span><span class="info-value">${d.nama}</span></div>
+  <div class="info-row"><span class="info-label">Merk</span><span class="info-value">${d.merk}</span></div>
+  <div class="info-row"><span class="info-label">Serial Number</span><span class="info-value" style="font-family:monospace;">${d.serial}</span></div>
+  <div class="info-row"><span class="info-label">Jumlah Unit</span><span class="info-value">${d.jumlah} unit</span></div>
+  <div class="info-row"><span class="info-label">Kondisi</span><span class="info-value"><span class="badge-print" style="${badgeStyle}">${d.kondisi}</span></span></div>
+  <div class="info-row"><span class="info-label">Diterima Oleh</span><span class="info-value">${d.penerima}</span></div>
+  <div class="info-row"><span class="info-label">Pengirim / Vendor</span><span class="info-value">${d.vendor||'—'}</span></div>
+  <div class="info-row"><span class="info-label">Spesifikasi</span><span class="info-value">${d.spek||'—'}</span></div>
+  <div class="info-row full"><span class="info-label">Catatan</span><span class="info-value">${d.catatan||'—'}</span></div>
+</div>
+
+<div class="foto-section">
+  <h4>📷 Foto Barang</h4>
+  <div class="foto-wrap">${fotoHTML}</div>
+</div>
+
+<div class="ttd-area">
+  <div class="ttd-box"><div class="ttd-line">Penerima Barang<br><strong>${d.penerima}</strong></div></div>
+  <div class="ttd-box"><div class="ttd-line">Pengirim / Vendor<br><strong>${d.vendor||'............................'}</strong></div></div>
+</div>
+
+<div class="footer-print">
+  <span>Dicetak: ${new Date().toLocaleDateString('id-ID', {day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+  <span>ID Barang: #${d.id}</span>
+</div>
+
+<div style="text-align:center;margin-top:20px;">
+  <button onclick="window.print()" style="padding:10px 28px;background:#6C63FF;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">🖨️ Cetak / Simpan PDF</button>
+  <button onclick="window.close()" style="padding:10px 20px;background:#eee;color:#333;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-left:10px;">✕ Tutup</button>
+</div>
+</body></html>`);
+  win.document.close();
+  win.focus();
+}
+
+// ===== DUPLIKAT BARANG =====
+function duplikatBarang(id) {
+  const d = data.find(x => x.id === id);
+  if (!d) return;
+  const copy = { ...d, id: Date.now().toString(), tanggal: new Date().toISOString().split('T')[0], nopd: '' };
+  data.unshift(copy);
+  saveData(); renderTable(); updateSummary();
+  toast('📋 Barang berhasil diduplikat! Silakan edit sesuai kebutuhan.', 'info');
+}
+
+// ===== TOAST =====
+function toast(msg, type='info') {
+  const tc = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  tc.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+</script>
+</body>
+</html>
