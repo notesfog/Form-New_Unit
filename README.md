@@ -97,4 +97,4 @@ pencatatan-laptop.html
 ---
 
 ## 👨‍💻 Author
-Muhammad Iqbal Sopian
+Muhammad Iqbal Sopian - Tulus Tekno Rent
